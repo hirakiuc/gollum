@@ -173,7 +173,7 @@ end
 desc "Show routes"
 task "routes" do
   require "yard/sinatra"
-  YARD::Registry.load ["lib/gollum/app.rb"], true
+  YARD::Registry.load ["lib/gollum/app.rb", "lib/gollum/auth.rb"], true
   routes = []
 
   YARD::Sinatra.routes.each do |route|

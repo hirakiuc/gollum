@@ -10,46 +10,73 @@ OmniAuth.config.on_failure = Proc.new{|env|
 }
 
 module Precious
-  class App < Sinatra::Base
+  module AuthRoute
 
-    OmniAuthProviderSetup = lambda do |env|
-      {
-        :name => 'gapps',
-        :identifier => "https://www.google.com/accounts/o8/site-xrds?hd=#{App.auth_domain}",
-        :store => OpenID::Store::Filesystem.new('/tmp/sessions')
-      }
-    end
+    def self.registered(base)
+        #provider :open_id,
+        #    :name => 'gapps',
+        #    :identifier => "https://www.google.com/accounts/o8/site-xrds?hd=altab.jp",
+        #    :store => OpenID::Store::Filesystem.new('/tmp/sessions')
 
-    use Rack::Session::Cookie, :secret => 'supers3cr3t'
-    use OmniAuth::Builder do
-      provider :open_id, :setup => OmniAuthProviderSetup
-    end
+      base.use Rack::Session::Cookie, :secret => 'supers3cr3t'
+      base.use OmniAuth::Builder do
+        provider :open_id,
+          :name => 'gapps',
+          :store => OpenID::Store::Filesystem.new('/tmp/sessions'),
+          :setup => true
+      end
 
-    post '/auth/gapps/callback' do
-      auth_details = request.env['omniauth.auth']
-      session[:name]  = auth_details.info['name']
-      session[:email] = auth_details.info['email']
-      redirect '/auth/gapps/welcome'
-    end
+      base.get '/auth/:provider/setup' do
+        request.env['omniauth.strategy'].options[:identifier] = \
+          "https://www.google.com/accounts/o8/site-xrds?hd=#{App.auth_domain}"
+        halt 404
+      end
 
-    get '/auth/gapps/welcome' do
-      if (session['email'] || session['name'])
-        redirect '/'
-      else
-        redirect '/auth/gapps'
+      base.post '/auth/:provider/callback' do
+        auth_details = request.env['omniauth.auth']
+        session[:name]  = auth_details.info['name']
+        session[:email] = auth_details.info['email']
+        redirect "/auth/#{params[:provider]}/welcome"
+      end
+
+      base.get '/auth/:provider/welcome' do
+        if base.is_authed?(session)
+          redirect '/'
+        else
+          redirect "/auth/failure"
+        end
+      end
+
+      base.get '/auth/signout' do
+        session.clear
+        'signout completed.'
+      end
+
+      base.get '/auth/failure' do
+        params['message']
+        # do whatever you want here.
+      end
+
+      def auth_request?(request)
+        method = request.request_method.downcase
+        path   = request.path_info
+
+        case method
+        when 'post'
+          ('/auth/gapps/callback' == path)
+        when 'get'
+          %w[/auth/gapps /auth/gapps/setup /auth/signout /auth/failure].include?(path)
+        else
+          false
+        end
+      end
+
+      def is_authed?(session)
+        name = session[:name]
+        !(name.nil? or name.empty?)
       end
     end
 
-    get '/auth/signout' do
-      session.clear
-      'signout completed.'
-      redirect '/'
-    end
-
-    get '/auth/failure' do
-      params['message']
-      # do whatever you want here.
-    end
   end
 end
 

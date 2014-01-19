@@ -31,7 +31,7 @@ context "Frontend Unicode support" do
     Precious::App.set(:gollum_path, @path)
     Precious::App.set(:wiki_options, {})
 
-    Precious::App.any_instance.stubs(:is_authed?).returns(true)
+    Precious::App.stubs(:is_authed?).returns(true)
   end
 
   teardown do
