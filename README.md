@@ -5,6 +5,47 @@ gollum -- A wiki built on top of Git
 [![Build Status](https://secure.travis-ci.org/gollum/gollum.png?branch=master)](http://travis-ci.org/gollum/gollum)
 [![Dependency Status](https://gemnasium.com/gollum/gollum.png)](https://gemnasium.com/gollum/gollum)
 
+## Warning: This is forked repository!
+
+If you want to check official repo, See [gollum](https://github.com/gollum/gollum).
+
+This fork contains omniauth with google apps.
+
+### HOW TO USE
+
+Add config.ru and just rakcup !
+
+```ruby
+require 'rubygems'
+require 'bundler'
+Bundler.require
+
+require 'gollum/app'
+
+gollum_path = '/path/to/git/repo'
+
+options = {
+  'port' => 4567,
+  'bind' => '0.0.0.0'
+}
+
+wiki_options = {
+  :universal_toc => true,
+  :live_preview  => false,
+  :allow_uploads => false
+}
+
+Precious::App.set(:gollum_path,  gollum_path)
+Precious::App.set(:default_markup, :markdown)
+Precious::App.set(:wiki_options, wiki_options)
+
+Precious::App.set(:auth_domain, 'yourdomain.com') # change to your domain.
+
+Precious::App.run!(options)
+```
+
+If you want to change options, chenge 'options' and 'wiki_options' in the 'config.ru'.
+
 ## DESCRIPTION
 
 Gollum is a simple wiki system built on top of Git that powers GitHub Wikis.

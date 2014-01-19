@@ -10,7 +10,7 @@ context "Frontend" do
     Precious::App.set(:gollum_path, @path)
     Precious::App.set(:wiki_options, {})
 
-    Precious::App.any_instance.stubs(:is_authed?).returns(true)
+    Precious::App.stubs(:is_authed?).returns(true)
   end
 
   teardown do
@@ -551,7 +551,7 @@ context "Frontend with lotr" do
     Precious::App.set(:gollum_path, @path)
     Precious::App.set(:wiki_options, {})
 
-    Precious::App.any_instance.stubs(:is_authed?).returns(true)
+    Precious::App.stubs(:is_authed?).returns(true)
   end
 
   teardown do
