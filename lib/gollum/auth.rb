@@ -57,6 +57,10 @@ module Precious
         # do whatever you want here.
       end
 
+      base.get '/auth/top' do
+        mustache :top
+      end
+
       def auth_request?(request)
         method = request.request_method.downcase
         path   = request.path_info
@@ -65,7 +69,7 @@ module Precious
         when 'post'
           ('/auth/gapps/callback' == path)
         when 'get'
-          %w[/auth/gapps /auth/gapps/setup /auth/signout /auth/failure].include?(path)
+          %w[/auth/top /auth/gapps /auth/gapps/setup /auth/signout /auth/failure].include?(path)
         else
           false
         end
