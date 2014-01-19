@@ -41,6 +41,8 @@ end
 # See the wiki.rb file for more details on wiki options
 module Precious
   class App < Sinatra::Base
+    register Precious::AuthRoute
+
     register Mustache::Sinatra
     include Precious::Helpers
 
@@ -58,11 +60,6 @@ module Precious
     def supported_useragent?(user_agent)
       ua = UserAgent.parse(user_agent)
       @@min_ua.detect {|min| ua >= min }
-    end
-
-    def is_authed?(session)
-      name = session[:name]
-      !(name.nil? or name.empty?)
     end
 
     # We want to serve public assets for now
@@ -101,7 +98,9 @@ module Precious
       @js = settings.wiki_options[:js]
 
       return if request.path_info == '/favicon.ico'
-      redirect '/auth/gapps' unless is_authed?(session)
+      unless App.auth_request?(request)
+        redirect '/auth/gapps' unless App.is_authed?(session)
+      end
     end
 
     get '/favicon.ico' do
