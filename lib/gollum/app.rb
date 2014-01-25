@@ -99,7 +99,7 @@ module Precious
 
       return if request.path_info == '/favicon.ico'
       unless App.auth_request?(request)
-        redirect '/auth/top' unless App.is_authed?(session)
+        redirect "#{@base_url}/auth/top" unless App.is_authed?(session)
       end
     end
 
